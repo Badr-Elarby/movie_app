@@ -75,19 +75,6 @@ This project is built following Clean Architecture principles to ensure a scalab
 ---
 
 
-<div align="center">
-
-![Online](https://img.shields.io/badge/Network-Online-success) 
-![Offline](https://img.shields.io/badge/Cache-Hive-yellow)
-
-</div>
-
-> ## 🔔 Data behavior (IMPORTANT)
-> **NETWORK →** live API (TMDB).  
-> **NO NETWORK →** data served from local Hive cache; images loaded from cached_network_image cache.
-
-
-
 
 
 ## Getting Started
