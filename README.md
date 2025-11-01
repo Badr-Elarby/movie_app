@@ -66,7 +66,7 @@ This project is built following Clean Architecture principles to ensure a scalab
 
 </div>
 
----
+
 
 **How it works:**  
 - ✅ When the device has internet → app calls the TMDB API and updates Hive cache.  
