@@ -148,7 +148,7 @@ Crash reports tracked successfully using **Firebase Crashlytics** 🔥
 
 | Crash Example 1 | Crash Example 2 | Crash Dashboard |
 |-----------------|-----------------|-----------------|
-| ![Crash 1](media/crashlytics.png) | ![Crash 2](media/crashlytics_2.png) | ![Crash Dashboard](media/crashlytics_3.png) |
+| ![Crash Dashboard](media/crashlytics.png) | ![Crash Dashboard](media/crashlytics_2.png) | ![Crash Dashboard](media/crashlytics_3.png) |
 
 ---
 
