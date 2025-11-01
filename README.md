@@ -132,14 +132,14 @@ lib/
 ## 🌟 Light Theme
 | Home Screen | Home Screen (Scroll) | Details Screen |
 |--------------|----------------------|----------------|
-| ![Light Home 1](media/home_light.jpg) | ![Light Home 2](media/home_light_1.jpg) | ![Light Details](media/details_light.jpg) |
+| ![Light Home 1](media/home_light_1.jpg) | ![Light Home 2](media/home_light_2.jpg) | ![Light Details](media/details_light.jpg) |
 
 ---
 
 ## 🌙 Dark Theme
 | Home Screen | Home Screen (Scroll) | Details Screen |
 |--------------|----------------------|----------------|
-| ![Dark Home 1](media/home_dark.jpg) | ![Dark Home 2](media/home_dark_1.jpg) | ![Dark Details](media/details_dark.jpg) |
+| ![Dark Home 1](media/home_dark_1.jpg) | ![Dark Home 2](media/home_dark_2.jpg) | ![Dark Details](media/details_dark.jpg) |
 
 ---
 
@@ -148,7 +148,7 @@ Crash reports tracked successfully using **Firebase Crashlytics** 🔥
 
 | Crash Example 1 | Crash Example 2 | Crash Dashboard |
 |-----------------|-----------------|-----------------|
-| ![Crash 1](media/crashlytics.jpg) | ![Crash 2](media/crashlytics_2.jpg) | ![Crash Dashboard](media/crashlytics_3.jpg) |
+| ![Crash 1](media/crashlytics.png) | ![Crash 2](media/crashlytics_2.png) | ![Crash Dashboard](media/crashlytics_3.png) |
 
 ---
 
