@@ -274,7 +274,7 @@ class MovieDetailsScreen extends StatelessWidget {
             onPressed: () {
               FirebaseCrashlytics.instance.crash();
             },
-            child: const Text("💥 Crash App"),
+            child: const Text("💥 Crash App teeeest"),
           ),
         ],
       ),
