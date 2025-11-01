@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:simple_movie_app/core/di/injection_container.dart';
@@ -269,6 +270,12 @@ class MovieDetailsScreen extends StatelessWidget {
           Text('Description', style: textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(details.overview, style: textTheme.bodyMedium),
+          ElevatedButton(
+            onPressed: () {
+              FirebaseCrashlytics.instance.crash();
+            },
+            child: const Text("💥 Crash App"),
+          ),
         ],
       ),
     );

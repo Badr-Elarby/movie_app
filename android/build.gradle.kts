@@ -1,3 +1,15 @@
+plugins {
+    id("com.android.application") version "8.7.3" apply false
+    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
+    // Firebase plugins - versions must match settings.gradle.kts
+    // These versions are compatible with FlutterFire and AGP 8.7.3
+    id("com.google.gms.google-services") version "4.3.15" apply false
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
+}
+
+
+
+
 allprojects {
     repositories {
         google()

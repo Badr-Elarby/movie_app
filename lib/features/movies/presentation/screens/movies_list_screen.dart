@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_movie_app/core/routing/app_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -141,49 +142,35 @@ class _MovieCard extends StatelessWidget {
                   height: 100,
                   color: colorScheme.surfaceVariant,
                   child: imageUrl != null
-                      ? Image.network(
-                          imageUrl,
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
                           fit: BoxFit.cover,
-                          loadingBuilder:
-                              (
-                                BuildContext context,
-                                Widget child,
-                                ImageChunkEvent? loadingProgress,
-                              ) {
-                                if (loadingProgress == null) {
-                                  print(
-                                    '[UI] Image loaded successfully for "${movie.title}"',
-                                  );
-                                  return child;
-                                }
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value:
-                                        loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                  .cumulativeBytesLoaded /
-                                              loadingProgress
-                                                  .expectedTotalBytes!
-                                        : null,
-                                  ),
-                                );
-                              },
-                          errorBuilder:
-                              (
-                                BuildContext context,
-                                Object error,
-                                StackTrace? stackTrace,
-                              ) {
-                                print(
-                                  '[UI] ERROR: Failed to load image for "${movie.title}": $error',
-                                );
-                                // Show placeholder when image fails to load
-                                return Icon(
-                                  Icons.image_not_supported_outlined,
-                                  color: colorScheme.onSurfaceVariant,
-                                );
-                              },
+                          placeholder: (BuildContext context, String url) {
+                            print('[UI] Loading cached image for "${movie.title}" from $url');
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: colorScheme.secondary,
+                              ),
+                            );
+                          },
+                          errorWidget: (
+                            BuildContext context,
+                            String url,
+                            dynamic error,
+                          ) {
+                            print(
+                              '[UI] ERROR: Failed to load cached image for "${movie.title}": $error',
+                            );
+                            return Icon(
+                              Icons.image_not_supported_outlined,
+                              color: colorScheme.onSurfaceVariant,
+                            );
+                          },
+                          // Cache configuration
+                          memCacheWidth: 140,
+                          memCacheHeight: 200,
+                          maxWidthDiskCache: 300,
+                          maxHeightDiskCache: 450,
                         )
                       : Icon(
                           Icons.image_not_supported_outlined,

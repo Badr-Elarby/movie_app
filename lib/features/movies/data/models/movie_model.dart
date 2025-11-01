@@ -1,4 +1,9 @@
-class MovieModel {
+import 'package:hive/hive.dart';
+
+part 'movie_model.g.dart';
+
+@HiveType(typeId: 0)
+class MovieModel extends HiveObject {
   MovieModel({
     required this.id,
     required this.title,
@@ -8,11 +13,22 @@ class MovieModel {
     this.genre_ids,
   });
 
+  @HiveField(0)
   final int id;
+
+  @HiveField(1)
   final String title;
+
+  @HiveField(2)
   final String? overview;
+
+  @HiveField(3)
   final String? poster_path;
+
+  @HiveField(4)
   final double? vote_average;
+
+  @HiveField(5)
   final List<int>? genre_ids;
 
   // Convenience getters to maintain readability in the UI (optional)

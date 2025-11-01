@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "130876239407",
+    "project_id": "badr-movie-app",
+    "storage_bucket": "badr-movie-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130876239407:android:e53ac61f367fb27add20da",
+        "android_client_info": {
+          "package_name": "com.example.simple_movie_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjvSkrcs-oGftrWSsJl0ROIV1eUIBFpu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
