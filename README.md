@@ -59,20 +59,20 @@ This project is built following Clean Architecture principles to ensure a scalab
 
 <div align="center">
 
-# 🎬 Simple Movie App
-
-<!-- Dynamic badge using shields.io -->
-![Data Source](https://img.shields.io/badge/Data%20Source-Online%20%7C%20Offline%20(Hi ve%2C%20Cache)-brightgreen)
+<h1 style="color:#ff6b6b; font-size:48px; margin: 12px 0;">
+⚡ DATA SOURCE: ONLINE — FALLBACK TO CACHE WHEN OFFLINE ⚡
+</h1>
 
 </div>
 
 ---
 
-> ⚠️ **IMPORTANT — DATA SOURCE**  
-> **Data is fetched from the network when online.**  
-> **If there is no internet, the app automatically loads cached data from Hive (offline mode).**
+**How it works:**  
+- ✅ When the device has internet → app calls the TMDB API and updates Hive cache.  
+- 📴 When the device is offline → app reads from Hive cache and shows data & cached images (via `cached_network_image`).
 
 ---
+
 
 
 
