@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:simple_movie_app/core/di/injection_container.dart';
+import 'package:simple_movie_app/features/movies/presentation/cubits/movies_cubit/movies_cubit.dart';
 import 'package:simple_movie_app/features/movies/presentation/screens/movie_details_screen.dart';
 import 'package:simple_movie_app/features/movies/presentation/screens/movies_list_screen.dart';
 
@@ -12,13 +15,27 @@ class AppRouter {
     switch (settings.name) {
       case initialRoute:
         return MaterialPageRoute<dynamic>(
-          builder: (_) => const MoviesListScreen(),
+          builder: (_) => BlocProvider<MoviesCubit>(
+            create: (_) => getIt<MoviesCubit>()..loadFirstPage(),
+            child: const MoviesListScreen(),
+          ),
           settings: const RouteSettings(name: initialRoute),
         );
       case movieDetailsRoute:
+        final int? movieId = settings.arguments as int?;
+        if (movieId == null) {
+          // Fallback to initial route if no movie ID provided
+          return MaterialPageRoute<dynamic>(
+            builder: (_) => BlocProvider<MoviesCubit>(
+              create: (_) => getIt<MoviesCubit>()..loadFirstPage(),
+              child: const MoviesListScreen(),
+            ),
+            settings: const RouteSettings(name: initialRoute),
+          );
+        }
         return MaterialPageRoute<dynamic>(
-          builder: (_) => const MovieDetailsScreen(),
-          settings: const RouteSettings(name: movieDetailsRoute),
+          builder: (_) => MovieDetailsScreen(movieId: movieId),
+          settings: RouteSettings(name: movieDetailsRoute, arguments: movieId),
         );
       default:
         return MaterialPageRoute<dynamic>(

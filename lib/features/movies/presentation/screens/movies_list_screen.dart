@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:simple_movie_app/core/routing/app_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:simple_movie_app/core/theming/cubit/theme_cubit.dart';
+import 'package:simple_movie_app/features/movies/presentation/cubits/movies_cubit/movies_cubit.dart';
+import 'package:simple_movie_app/features/movies/presentation/cubits/movies_cubit/movies_state.dart';
+import 'package:simple_movie_app/features/movies/data/models/movie_model.dart';
 
 class MoviesListScreen extends StatelessWidget {
   const MoviesListScreen({super.key});
@@ -10,35 +13,6 @@ class MoviesListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
-
-    // Temporary dummy items just for UI preview
-    final List<_MovieListItemData> movies = <_MovieListItemData>[
-      const _MovieListItemData(
-        title: 'Fight Club',
-        rating: 8.8,
-        genre: 'Drama',
-      ),
-      const _MovieListItemData(
-        title: 'Forrest Gump',
-        rating: 8.8,
-        genre: 'Drama',
-      ),
-      const _MovieListItemData(
-        title: 'The Shawshank Redemption',
-        rating: 9.3,
-        genre: 'Drama',
-      ),
-      const _MovieListItemData(
-        title: 'The Godfather',
-        rating: 9.2,
-        genre: 'Crime',
-      ),
-      const _MovieListItemData(
-        title: 'The Matrix',
-        rating: 8.7,
-        genre: 'Sci‑Fi',
-      ),
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -58,22 +32,43 @@ class MoviesListScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                itemCount: movies.length,
-                separatorBuilder: (BuildContext context, int index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (BuildContext context, int index) {
-                  final _MovieListItemData data = movies[index];
-                  return _MovieCard(
-                    data: data,
-                    onTap: () {
-                      Navigator.of(
-                        context,
-                      ).pushNamed(AppRouter.movieDetailsRoute);
+              child: BlocBuilder<MoviesCubit, MoviesState>(
+                builder: (BuildContext context, MoviesState state) {
+                  if (state is MoviesLoading || state is MoviesInitial) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is MoviesFailure) {
+                    return Center(
+                      child: Text(state.message, style: textTheme.bodyMedium),
+                    );
+                  }
+                  final MoviesSuccess data = state as MoviesSuccess;
+                  print('[UI] Building list with ${data.movies.length} movies');
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    itemCount: data.movies.length,
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (BuildContext context, int index) {
+                      final MovieModel movie = data.movies[index];
+                      print(
+                        '[UI] Building movie card for "${movie.title}" (ID: ${movie.id}, Index: $index)',
+                      );
+                      return _MovieCard(
+                        movie: movie,
+                        onTap: () {
+                          print(
+                            '[UI] Navigating to movie details for "${movie.title}" (ID: ${movie.id})',
+                          );
+                          Navigator.of(context).pushNamed(
+                            AppRouter.movieDetailsRoute,
+                            arguments: movie.id,
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -85,7 +80,7 @@ class MoviesListScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 44,
                 child: FilledButton.tonal(
-                  onPressed: () {},
+                  onPressed: () => context.read<MoviesCubit>().loadNextPage(),
                   child: const Text('Load More Movies'),
                 ),
               ),
@@ -98,15 +93,33 @@ class MoviesListScreen extends StatelessWidget {
 }
 
 class _MovieCard extends StatelessWidget {
-  const _MovieCard({required this.data, required this.onTap});
+  const _MovieCard({required this.movie, required this.onTap});
 
-  final _MovieListItemData data;
+  final MovieModel movie;
   final VoidCallback onTap;
+
+  // TMDB base image URL for posters
+  // Issue fixed: The original code was not constructing the full image URL.
+  // TMDB requires the base URL + size (w500) + poster_path to display images.
+  static const String _imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
+
+    // Build the full image URL from TMDB poster_path
+    // Original issue: poster_path was stored but never used to build the image URL.
+    // The UI was showing a placeholder icon instead of fetching the actual image.
+    final String? posterPath = movie.poster_path;
+    final String? imageUrl = (posterPath != null && posterPath.isNotEmpty)
+        ? '$_imageBaseUrl$posterPath'
+        : null;
+
+    print('[UI] Movie "${movie.title}" - Poster path: ${posterPath ?? 'null'}');
+    print(
+      '[UI] Movie "${movie.title}" - Image URL: ${imageUrl ?? 'null (will show placeholder)'}',
+    );
 
     return InkWell(
       onTap: onTap,
@@ -124,13 +137,58 @@ class _MovieCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  width: 56,
-                  height: 80,
+                  width: 70,
+                  height: 100,
                   color: colorScheme.surfaceVariant,
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  child: imageUrl != null
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder:
+                              (
+                                BuildContext context,
+                                Widget child,
+                                ImageChunkEvent? loadingProgress,
+                              ) {
+                                if (loadingProgress == null) {
+                                  print(
+                                    '[UI] Image loaded successfully for "${movie.title}"',
+                                  );
+                                  return child;
+                                }
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value:
+                                        loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                  .cumulativeBytesLoaded /
+                                              loadingProgress
+                                                  .expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                          errorBuilder:
+                              (
+                                BuildContext context,
+                                Object error,
+                                StackTrace? stackTrace,
+                              ) {
+                                print(
+                                  '[UI] ERROR: Failed to load image for "${movie.title}": $error',
+                                );
+                                // Show placeholder when image fails to load
+                                return Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: colorScheme.onSurfaceVariant,
+                                );
+                              },
+                        )
+                      : Icon(
+                          Icons.image_not_supported_outlined,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -139,7 +197,7 @@ class _MovieCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      data.title,
+                      movie.title,
                       style: textTheme.titleMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -153,7 +211,10 @@ class _MovieCard extends StatelessWidget {
                           size: 18,
                         ),
                         const SizedBox(width: 4),
-                        Text('${data.rating}/10', style: textTheme.bodySmall),
+                        Text(
+                          '${(movie.vote_average ?? 0).toStringAsFixed(1)}/10',
+                          style: textTheme.bodySmall,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -167,7 +228,10 @@ class _MovieCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: colorScheme.outlineVariant),
                       ),
-                      child: Text(data.genre, style: textTheme.labelMedium),
+                      child: Text(
+                        movie.genre_ids?.isNotEmpty == true ? 'Movie' : 'N/A',
+                        style: textTheme.labelMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -183,16 +247,4 @@ class _MovieCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MovieListItemData {
-  const _MovieListItemData({
-    required this.title,
-    required this.rating,
-    required this.genre,
-  });
-
-  final String title;
-  final double rating;
-  final String genre;
 }

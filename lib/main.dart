@@ -4,8 +4,11 @@ import 'package:simple_movie_app/core/routing/app_router.dart';
 import 'package:simple_movie_app/core/theming/cubit/theme_cubit.dart';
 import 'package:simple_movie_app/core/theming/dark_theme.dart';
 import 'package:simple_movie_app/core/theming/light_theme.dart';
+import 'package:simple_movie_app/core/di/injection_container.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupGetIt();
   runApp(const MoviesApp());
 }
 
