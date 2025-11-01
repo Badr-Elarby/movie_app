@@ -53,6 +53,7 @@ This project is built following Clean Architecture principles to ensure a scalab
 - Firebase Crashlytics
 - Fastlane (Firebase App Distribution)
 - Caching with Shared Preferences
+- Theme Switching
 
 
 
