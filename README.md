@@ -146,7 +146,7 @@ lib/
 ## 🧠 Firebase Crashlytics
 Crash reports tracked successfully using **Firebase Crashlytics** 🔥  
 
-| Crash Example 1 | Crash Example 2 | Crash Dashboard |
+| Crash Dashboard | Crash Dashboard | Crash Dashboard |
 |-----------------|-----------------|-----------------|
 | ![Crash Dashboard](media/crashlytics.png) | ![Crash Dashboard](media/crashlytics_2.png) | ![Crash Dashboard](media/crashlytics_3.png) |
 
