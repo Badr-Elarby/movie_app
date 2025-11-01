@@ -6,7 +6,7 @@ A Flutter application for browsing popular movies, demonstrating modern app arch
 
 
 A Flutter app built with **Clean Architecture**, **Cubit**, and **Firebase Crashlytics** integration.  
-Supports both **Light** and **Dark** themes 🌗
+Supports both ***Light*** and ***Dark*** themes 🌗
 
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
