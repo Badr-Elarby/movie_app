@@ -2,8 +2,8 @@ plugins {
     id("com.android.application") version "8.7.3" apply false
     id("org.jetbrains.kotlin.android") version "2.1.0" apply false
     // Firebase plugins - versions must match settings.gradle.kts
-    // These versions are compatible with FlutterFire and AGP 8.7.3
-    id("com.google.gms.google-services") version "4.3.15" apply false
+    // Google Services 4.4.1+ required for Crashlytics plugin 3.0.2+
+    id("com.google.gms.google-services") version "4.4.2" apply false
     id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 

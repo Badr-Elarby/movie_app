@@ -1,0 +1,29 @@
+default_platform(:android)
+
+platform :android do
+  desc "Lane For Android Firebase App Distribution"
+  lane :firebase_distribution do
+    Dir.chdir("..") do
+      # 🧹 تنظيف المشروع
+      sh "flutter clean"
+
+      # ❌ حذف ملف الـ APK القديم لو موجود
+      sh "if exist build\\app\\outputs\\flutter-apk\\app-release.apk del /F /Q build\\app\\outputs\\flutter-apk\\app-release.apk"
+
+      # 🏗️ بناء الـ APK الجديد
+      sh "flutter build apk --release"
+      # or flutter build apk --release --no-tree-shake-icons --no-sound-null-safety
+			# or flutter build apk --release --no-tree-shake-icons
+
+      # 🚀 رفع إلى Firebase App Distribution
+      firebase_app_distribution(
+        app: "1:130876239407:android:e53ac61f367fb27add20da",
+        testers: "badrtest66@gmail.com",
+        firebase_cli_token: ENV["FIREBASE_TOKEN"],
+        android_artifact_type: "APK",
+        android_artifact_path: "build/app/outputs/flutter-apk/app-release.apk",
+        release_notes: "🔥 New clean build uploaded to Firebase 🔥"
+      )
+    end
+  end
+end

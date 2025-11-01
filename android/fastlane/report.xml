@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.0008697">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: flutter clean" time="3.8174871">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: if exist build\app\outputs\flutter-apk\app-release.apk del /F /Q build\app\outputs\flutter-apk\app-release.apk" time="0.0182445">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="3: flutter build apk --release" time="267.4119683">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="4: firebase_app_distribution" time="31.8409246">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>

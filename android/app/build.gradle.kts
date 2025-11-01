@@ -11,7 +11,9 @@ plugins {
 android {
     namespace = "com.example.simple_movie_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // Use NDK 27.0.12077973 as required by Firebase plugins and other dependencies
+    // This is the highest required version and is backward compatible
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
