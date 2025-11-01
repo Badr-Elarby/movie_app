@@ -61,8 +61,7 @@ This project is built following Clean Architecture principles to ensure a scalab
 <div align="center">
 
 <h1 style="color:#ff6b6b; font-size:48px; margin: 12px 0;">
-⚡ DATA SOURCE:
-  ONLINE — FALLBACK TO CACHE WHEN OFFLINE ⚡
+⚡ DATA SOURCE: ONLINE — FALLBACK TO CACHE WHEN OFFLINE ⚡
 </h1>
 
 </div>
