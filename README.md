@@ -57,6 +57,25 @@ This project is built following Clean Architecture principles to ensure a scalab
 
 
 
+<div align="center">
+
+# 🎬 Simple Movie App
+
+<!-- Dynamic badge using shields.io -->
+![Data Source](https://img.shields.io/badge/Data%20Source-Online%20%7C%20Offline%20(Hi ve%2C%20Cache)-brightgreen)
+
+</div>
+
+---
+
+> ⚠️ **IMPORTANT — DATA SOURCE**  
+> **Data is fetched from the network when online.**  
+> **If there is no internet, the app automatically loads cached data from Hive (offline mode).**
+
+---
+
+
+
 ## Getting Started
 
 ### Prerequisites
