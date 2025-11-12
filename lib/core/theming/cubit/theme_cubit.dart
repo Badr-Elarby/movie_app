@@ -4,9 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ThemeCubit extends Cubit<ThemeMode> {
   ThemeCubit() : super(ThemeMode.system);
 
-  void setLight() => emit(ThemeMode.light);
-  void setDark() => emit(ThemeMode.dark);
-
   void toggle() {
     switch (state) {
       case ThemeMode.light:
@@ -21,5 +18,3 @@ class ThemeCubit extends Cubit<ThemeMode> {
     }
   }
 }
-
-
