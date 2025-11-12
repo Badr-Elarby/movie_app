@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:simple_movie_app/features/movies/data/datasources/movie_details_remote_data_source.dart';
 import 'package:simple_movie_app/features/movies/data/models/movie_details_model.dart';
+import 'package:simple_movie_app/features/movies/data/models/videos_response_model.dart';
 
 class MovieDetailsRemoteDataSourceImpl implements MovieDetailsRemoteDataSource {
   MovieDetailsRemoteDataSourceImpl(this._dio);
@@ -56,7 +57,9 @@ class MovieDetailsRemoteDataSourceImpl implements MovieDetailsRemoteDataSource {
         );
       } else if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        throw Exception('Connection timeout. Please check your internet connection.');
+        throw Exception(
+          'Connection timeout. Please check your internet connection.',
+        );
       } else if (e.type == DioExceptionType.connectionError) {
         throw Exception('No internet connection. Please check your network.');
       } else {
@@ -64,6 +67,56 @@ class MovieDetailsRemoteDataSourceImpl implements MovieDetailsRemoteDataSource {
       }
     } catch (e) {
       print('[DataSource] Unexpected error: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<VideosResponseModel> getMovieVideos({required int movieId}) async {
+    if (movieId <= 0) {
+      throw Exception('Invalid movie ID: $movieId');
+    }
+
+    final String endpoint = 'movie/$movieId/videos';
+    final Map<String, dynamic> queryParams = <String, dynamic>{
+      'language': 'en-US',
+    };
+
+    print('[DataSource] Requesting movie videos for movie ID: $movieId');
+    try {
+      final response = await _dio.get<dynamic>(
+        endpoint,
+        queryParameters: queryParams,
+      );
+
+      print(
+        '[DataSource] Response status code (videos): ${response.statusCode}',
+      );
+      if (response.data == null) {
+        throw Exception('Empty response from API');
+      }
+
+      return VideosResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      print('[DataSource] DioException (videos): ${e.message}');
+      if (e.response != null) {
+        throw Exception(
+          'Failed to load movie videos: ${e.response?.statusCode} - ${e.response?.statusMessage}',
+        );
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw Exception(
+          'Connection timeout. Please check your internet connection.',
+        );
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw Exception('No internet connection. Please check your network.');
+      } else {
+        throw Exception('Failed to load movie videos: ${e.message}');
+      }
+    } catch (e) {
+      print('[DataSource] Unexpected error (videos): $e');
       rethrow;
     }
   }

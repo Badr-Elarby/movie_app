@@ -5,6 +5,7 @@ import 'package:simple_movie_app/core/di/injection_container.dart';
 import 'package:simple_movie_app/features/movies/data/models/movie_details_model.dart';
 import 'package:simple_movie_app/features/movies/presentation/cubits/movie_details_cubit/movie_details_cubit.dart';
 import 'package:simple_movie_app/features/movies/presentation/cubits/movie_details_cubit/movie_details_state.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
   const MovieDetailsScreen({super.key, required this.movieId});
@@ -47,11 +48,13 @@ class MovieDetailsScreen extends StatelessWidget {
                 return true;
               }
               // For success states, rebuild if movie details change
-              if (previous is MovieDetailsSuccess && current is MovieDetailsSuccess) {
+              if (previous is MovieDetailsSuccess &&
+                  current is MovieDetailsSuccess) {
                 return previous.details.id != current.details.id;
               }
               // For failure states, rebuild if error message changes
-              if (previous is MovieDetailsFailure && current is MovieDetailsFailure) {
+              if (previous is MovieDetailsFailure &&
+                  current is MovieDetailsFailure) {
                 return previous.message != current.message;
               }
               return false;
@@ -165,20 +168,17 @@ class MovieDetailsScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        errorWidget: (
-                          BuildContext context,
-                          String url,
-                          dynamic error,
-                        ) {
-                          print(
-                            '[UI] ERROR: Failed to load cached poster: $error',
-                          );
-                          return Icon(
-                            Icons.image_not_supported_outlined,
-                            color: colorScheme.onSurfaceVariant,
-                            size: 40,
-                          );
-                        },
+                        errorWidget:
+                            (BuildContext context, String url, dynamic error) {
+                              print(
+                                '[UI] ERROR: Failed to load cached poster: $error',
+                              );
+                              return Icon(
+                                Icons.image_not_supported_outlined,
+                                color: colorScheme.onSurfaceVariant,
+                                size: 40,
+                              );
+                            },
                         // Cache configuration for better performance
                         memCacheWidth: 640,
                         memCacheHeight: 960,
@@ -287,6 +287,46 @@ class MovieDetailsScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
+          // Trailer button (if available)
+          Builder(
+            builder: (BuildContext context) {
+              final state = context.read<MovieDetailsCubit>().state;
+              String? trailerKey;
+              if (state is MovieDetailsSuccess) {
+                trailerKey = state.trailerKey;
+              }
+
+              if (trailerKey != null && trailerKey.isNotEmpty) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.play_circle_fill),
+                      label: const Text('Watch Trailer'),
+                      onPressed: () async {
+                        final Uri url = Uri.parse(
+                          'https://www.youtube.com/watch?v=$trailerKey',
+                        );
+                        try {
+                          if (!await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            print('[UI] Could not launch trailer URL: $url');
+                          }
+                        } catch (e) {
+                          print('[UI] Error launching trailer: $e');
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }
+              // No trailer available - show nothing (minimal UI change)
+              return const SizedBox.shrink();
+            },
+          ),
           // Overview
           Text('Description', style: textTheme.titleMedium),
           const SizedBox(height: 8),

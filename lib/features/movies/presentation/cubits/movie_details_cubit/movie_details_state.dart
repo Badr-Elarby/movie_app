@@ -1,4 +1,5 @@
 import '../../../data/models/movie_details_model.dart';
+import '../../../data/models/video_model.dart';
 
 abstract class MovieDetailsState {
   const MovieDetailsState();
@@ -18,6 +19,9 @@ class MovieDetailsFailure extends MovieDetailsState {
 }
 
 class MovieDetailsSuccess extends MovieDetailsState {
-  const MovieDetailsSuccess(this.details);
+  const MovieDetailsSuccess(this.details, {this.trailerKey, this.videos});
+
   final MovieDetailsModel details;
+  final String? trailerKey;
+  final List<VideoModel>? videos;
 }
