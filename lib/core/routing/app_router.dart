@@ -23,8 +23,8 @@ class AppRouter {
         );
       case movieDetailsRoute:
         final int? movieId = settings.arguments as int?;
-        if (movieId == null) {
-          // Fallback to initial route if no movie ID provided
+        if (movieId == null || movieId <= 0) {
+          // Fallback to initial route if no valid movie ID provided
           return MaterialPageRoute<dynamic>(
             builder: (_) => BlocProvider<MoviesCubit>(
               create: (_) => getIt<MoviesCubit>()..loadFirstPage(),

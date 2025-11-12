@@ -9,6 +9,10 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
 
   Future<void> loadMovieDetails({required int movieId}) async {
     print('[Cubit] State: Loading movie details for ID: $movieId');
+    // Prevent duplicate loading states
+    if (state is MovieDetailsLoading) {
+      return;
+    }
     emit(const MovieDetailsLoading());
     try {
       final details = await _repository.getMovieDetails(movieId: movieId);
@@ -16,7 +20,9 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
       emit(MovieDetailsSuccess(details));
     } catch (e) {
       print('[Cubit] State: Failure - Error loading movie details: $e');
-      emit(MovieDetailsFailure(e.toString()));
+      // Provide user-friendly error message
+      final String errorMessage = e.toString().replaceAll('Exception: ', '');
+      emit(MovieDetailsFailure(errorMessage.isEmpty ? 'Failed to load movie details' : errorMessage));
     }
   }
 }

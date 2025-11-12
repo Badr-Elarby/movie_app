@@ -1,4 +1,4 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:simple_movie_app/core/di/injection_container.dart';
@@ -24,13 +24,38 @@ class MovieDetailsScreen extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: () {
+              // Safe navigation with error handling
+              try {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                print('[UI] Navigation error: $e');
+              }
+            },
           ),
           title: Text('Movie Details', style: textTheme.titleMedium),
           centerTitle: true,
         ),
         body: SafeArea(
           child: BlocBuilder<MovieDetailsCubit, MovieDetailsState>(
+            // Performance optimization: only rebuild when state type or content changes
+            buildWhen: (previous, current) {
+              // Rebuild if state type changes
+              if (previous.runtimeType != current.runtimeType) {
+                return true;
+              }
+              // For success states, rebuild if movie details change
+              if (previous is MovieDetailsSuccess && current is MovieDetailsSuccess) {
+                return previous.details.id != current.details.id;
+              }
+              // For failure states, rebuild if error message changes
+              if (previous is MovieDetailsFailure && current is MovieDetailsFailure) {
+                return previous.message != current.message;
+              }
+              return false;
+            },
             builder: (BuildContext context, MovieDetailsState state) {
               if (state is MovieDetailsLoading) {
                 print('[UI] State: Loading');
@@ -62,9 +87,14 @@ class MovieDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
-                          context.read<MovieDetailsCubit>().loadMovieDetails(
-                            movieId: movieId,
-                          );
+                          // Safe cubit access with error handling
+                          try {
+                            context.read<MovieDetailsCubit>().loadMovieDetails(
+                              movieId: movieId,
+                            );
+                          } catch (e) {
+                            print('[UI] Error retrying: $e');
+                          }
                         },
                         child: const Text('Retry'),
                       ),
@@ -125,44 +155,35 @@ class MovieDetailsScreen extends StatelessWidget {
                 height: 480,
                 color: colorScheme.surfaceVariant,
                 child: imageUrl != null
-                    ? Image.network(
-                        imageUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.cover,
-                        loadingBuilder:
-                            (
-                              BuildContext context,
-                              Widget child,
-                              ImageChunkEvent? loadingProgress,
-                            ) {
-                              if (loadingProgress == null) {
-                                print('[UI] Poster loaded successfully');
-                                return child;
-                              }
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value:
-                                      loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                        errorBuilder:
-                            (
-                              BuildContext context,
-                              Object error,
-                              StackTrace? stackTrace,
-                            ) {
-                              print(
-                                '[UI] ERROR: Failed to load poster: $error',
-                              );
-                              return Icon(
-                                Icons.image_not_supported_outlined,
-                                color: colorScheme.onSurfaceVariant,
-                                size: 40,
-                              );
-                            },
+                        placeholder: (BuildContext context, String url) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: colorScheme.secondary,
+                            ),
+                          );
+                        },
+                        errorWidget: (
+                          BuildContext context,
+                          String url,
+                          dynamic error,
+                        ) {
+                          print(
+                            '[UI] ERROR: Failed to load cached poster: $error',
+                          );
+                          return Icon(
+                            Icons.image_not_supported_outlined,
+                            color: colorScheme.onSurfaceVariant,
+                            size: 40,
+                          );
+                        },
+                        // Cache configuration for better performance
+                        memCacheWidth: 640,
+                        memCacheHeight: 960,
+                        maxWidthDiskCache: 800,
+                        maxHeightDiskCache: 1200,
                       )
                     : Icon(
                         Icons.image_not_supported_outlined,
@@ -270,12 +291,6 @@ class MovieDetailsScreen extends StatelessWidget {
           Text('Description', style: textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(details.overview, style: textTheme.bodyMedium),
-          ElevatedButton(
-            onPressed: () {
-              FirebaseCrashlytics.instance.crash();
-            },
-            child: const Text("💥 Crash App teeeest"),
-          ),
         ],
       ),
     );

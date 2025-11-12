@@ -10,6 +10,10 @@ class MoviesCubit extends Cubit<MoviesState> {
 
   Future<void> loadFirstPage() async {
     print('[Cubit] State: Loading first page');
+    // Prevent duplicate loading states
+    if (state is MoviesLoading) {
+      return;
+    }
     emit(const MoviesLoading());
     try {
       final response = await _repository.getMovies(page: 1);
@@ -26,7 +30,13 @@ class MoviesCubit extends Cubit<MoviesState> {
       );
     } catch (e) {
       print('[Cubit] State: Failure - Error loading first page: $e');
-      emit(MoviesFailure(e.toString()));
+      // Provide user-friendly error message
+      final String errorMessage = e.toString().replaceAll('Exception: ', '');
+      emit(
+        MoviesFailure(
+          errorMessage.isEmpty ? 'Failed to load movies' : errorMessage,
+        ),
+      );
     }
   }
 
@@ -40,6 +50,10 @@ class MoviesCubit extends Cubit<MoviesState> {
       }
       return;
     }
+    // Prevent loading if already loading or in error state
+    if (state is MoviesLoading) {
+      return;
+    }
     final nextPage = current.page + 1;
     print('[Cubit] State: Loading next page ($nextPage)');
     try {
@@ -48,15 +62,22 @@ class MoviesCubit extends Cubit<MoviesState> {
       print(
         '[Cubit] State: Success - Loaded page $nextPage, total movies now: $totalMovies',
       );
-      emit(
-        current.copyWith(
-          movies: <MovieModel>[...current.movies, ...response.results],
-          page: response.page,
-        ),
-      );
+      // Verify state is still MoviesSuccess before updating
+      // (prevents race condition if user navigated away or state changed)
+      final currentState = state;
+      if (currentState is MoviesSuccess && currentState.page == current.page) {
+        emit(
+          currentState.copyWith(
+            movies: <MovieModel>[...currentState.movies, ...response.results],
+            page: response.page,
+          ),
+        );
+      }
     } catch (e) {
       print('[Cubit] State: Failure - Error loading next page: $e');
-      emit(MoviesFailure(e.toString()));
+      // Don't override success state with error when loading next page fails
+      // Keep the existing movies and just log the error
+      // This allows users to retry without losing their current list
     }
   }
 }

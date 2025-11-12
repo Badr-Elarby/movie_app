@@ -39,6 +39,8 @@ class MoviesApp extends StatelessWidget {
     return BlocProvider(
       create: (_) => ThemeCubit(),
       child: BlocBuilder<ThemeCubit, ThemeMode>(
+        // Performance optimization: only rebuild when theme mode changes
+        buildWhen: (previous, current) => previous != current,
         builder: (context, mode) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,

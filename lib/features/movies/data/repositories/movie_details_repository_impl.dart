@@ -10,10 +10,18 @@ class MovieDetailsRepositoryImpl implements MovieDetailsRepository {
   @override
   Future<MovieDetailsModel> getMovieDetails({required int movieId}) async {
     print('[Repository] Fetching movie details for movie ID: $movieId');
-    final MovieDetailsModel details =
-        await _remoteDataSource.getMovieDetails(movieId: movieId);
-    print('[Repository] Successfully parsed movie: "${details.title}"');
-    print('[Repository] Genres: ${details.genres?.length ?? 0}');
-    return details;
+    try {
+      final MovieDetailsModel details =
+          await _remoteDataSource.getMovieDetails(movieId: movieId);
+      print('[Repository] Successfully parsed movie: "${details.title}"');
+      print('[Repository] Genres: ${details.genres?.length ?? 0}');
+      return details;
+    } catch (e) {
+      print('[Repository] Error fetching movie details: $e');
+      // Re-throw with more context for better error handling
+      throw Exception(
+        'Failed to load movie details: ${e.toString()}',
+      );
+    }
   }
 }

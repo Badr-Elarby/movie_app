@@ -21,7 +21,14 @@ class MoviesListScreen extends StatelessWidget {
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-            onPressed: () => context.read<ThemeCubit>().toggle(),
+            onPressed: () {
+              // Safe cubit access with error handling
+              try {
+                context.read<ThemeCubit>().toggle();
+              } catch (e) {
+                print('[UI] Error toggling theme: $e');
+              }
+            },
             icon: Icon(
               Icons.brightness_6_rounded,
               color: colorScheme.onPrimaryContainer,
@@ -34,6 +41,23 @@ class MoviesListScreen extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: BlocBuilder<MoviesCubit, MoviesState>(
+                // Performance optimization: only rebuild when state type or content changes
+                buildWhen: (previous, current) {
+                  // Rebuild if state type changes
+                  if (previous.runtimeType != current.runtimeType) {
+                    return true;
+                  }
+                  // For success states, rebuild if movies list or pagination changes
+                  if (previous is MoviesSuccess && current is MoviesSuccess) {
+                    return previous.movies.length != current.movies.length ||
+                        previous.page != current.page;
+                  }
+                  // For failure states, rebuild if error message changes
+                  if (previous is MoviesFailure && current is MoviesFailure) {
+                    return previous.message != current.message;
+                  }
+                  return false;
+                },
                 builder: (BuildContext context, MoviesState state) {
                   if (state is MoviesLoading || state is MoviesInitial) {
                     return const Center(child: CircularProgressIndicator());
@@ -50,6 +74,8 @@ class MoviesListScreen extends StatelessWidget {
                       horizontal: 16,
                       vertical: 12,
                     ),
+                    // Performance optimization: cacheExtent for better scrolling
+                    cacheExtent: 500,
                     itemCount: data.movies.length,
                     separatorBuilder: (BuildContext context, int index) =>
                         const SizedBox(height: 12),
@@ -59,15 +85,26 @@ class MoviesListScreen extends StatelessWidget {
                         '[UI] Building movie card for "${movie.title}" (ID: ${movie.id}, Index: $index)',
                       );
                       return _MovieCard(
+                        key: ValueKey('movie_${movie.id}'),
                         movie: movie,
                         onTap: () {
                           print(
                             '[UI] Navigating to movie details for "${movie.title}" (ID: ${movie.id})',
                           );
-                          Navigator.of(context).pushNamed(
-                            AppRouter.movieDetailsRoute,
-                            arguments: movie.id,
-                          );
+                          // Safe navigation with error handling and validation
+                          if (movie.id > 0) {
+                            try {
+                              Navigator.of(context).pushNamed(
+                                AppRouter.movieDetailsRoute,
+                                arguments: movie.id,
+                              );
+                            } catch (e) {
+                              print('[UI] Navigation error: $e');
+                              // Navigation error handled gracefully
+                            }
+                          } else {
+                            print('[UI] Invalid movie ID: ${movie.id}');
+                          }
                         },
                       );
                     },
@@ -81,7 +118,14 @@ class MoviesListScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 44,
                 child: FilledButton.tonal(
-                  onPressed: () => context.read<MoviesCubit>().loadNextPage(),
+                  onPressed: () {
+                    // Safe cubit access with error handling
+                    try {
+                      context.read<MoviesCubit>().loadNextPage();
+                    } catch (e) {
+                      print('[UI] Error loading next page: $e');
+                    }
+                  },
                   child: const Text('Load More Movies'),
                 ),
               ),
@@ -94,7 +138,11 @@ class MoviesListScreen extends StatelessWidget {
 }
 
 class _MovieCard extends StatelessWidget {
-  const _MovieCard({required this.movie, required this.onTap});
+  const _MovieCard({
+    super.key,
+    required this.movie,
+    required this.onTap,
+  });
 
   final MovieModel movie;
   final VoidCallback onTap;
