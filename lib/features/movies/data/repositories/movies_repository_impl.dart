@@ -16,7 +16,10 @@ class MoviesRepositoryImpl implements MoviesRepository {
   final Connectivity _connectivity;
 
   @override
-  Future<MoviesResponseModel> getMovies({required int page}) async {
+  Future<MoviesResponseModel> getMovies({
+    required int page,
+    String? query,
+  }) async {
     print('[Repository] Fetching movies for page $page');
 
     // Check network connectivity
@@ -34,16 +37,19 @@ class MoviesRepositoryImpl implements MoviesRepository {
       // Online: Fetch from API and cache
       try {
         print('[Repository] Fetching from API...');
-        final MoviesResponseModel response = await _remoteDataSource
-            .getPopularMovies(page: page);
+        final MoviesResponseModel response = (query != null && query.isNotEmpty)
+            ? await _remoteDataSource.searchMovies(page: page, query: query)
+            : await _remoteDataSource.getPopularMovies(page: page);
         print(
           '[Repository] ✅ API response received: ${response.results.length} movies from page ${response.page}',
         );
         print('[Repository] Total pages available: ${response.total_pages}');
 
-        // Cache the response
-        await _localDataSource.cacheMovies(response);
-        print('[Repository] ✅ Cached API response for offline access');
+        // Cache the response only for popular/discover calls
+        if (query == null || query.isEmpty) {
+          await _localDataSource.cacheMovies(response);
+          print('[Repository] ✅ Cached API response for offline access');
+        }
 
         return response;
       } catch (e) {

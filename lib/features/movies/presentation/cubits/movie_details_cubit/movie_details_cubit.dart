@@ -3,6 +3,8 @@ import '../../../data/repositories/movie_details_repository.dart';
 import 'movie_details_state.dart';
 import '../../../data/models/video_model.dart';
 import '../../../data/models/videos_response_model.dart';
+import '../../../data/models/credits_response_model.dart';
+import '../../../data/models/cast_member_model.dart';
 
 class MovieDetailsCubit extends Cubit<MovieDetailsState> {
   MovieDetailsCubit(this._repository) : super(const MovieDetailsInitial());
@@ -21,6 +23,7 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
       // Fetch videos (trailers) for this movie
       String? trailerKey;
       List<VideoModel>? videos;
+      List<CastMemberModel>? cast;
       try {
         final VideosResponseModel videosResponse = await _repository
             .getMovieVideos(movieId: movieId);
@@ -41,8 +44,22 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
         print('[Cubit] Warning: Failed to load videos for movie $movieId: $e');
       }
       print('[Cubit] State: Success - Loaded movie: "${details.title}"');
+      try {
+        final CreditsResponseModel credits = await _repository.getMovieCredits(
+          movieId: movieId,
+        );
+        cast = credits.cast;
+      } catch (e) {
+        print('[Cubit] Warning: Failed to load credits for movie $movieId: $e');
+      }
+
       emit(
-        MovieDetailsSuccess(details, trailerKey: trailerKey, videos: videos),
+        MovieDetailsSuccess(
+          details,
+          trailerKey: trailerKey,
+          videos: videos,
+          cast: cast,
+        ),
       );
     } catch (e) {
       print('[Cubit] State: Failure - Error loading movie details: $e');

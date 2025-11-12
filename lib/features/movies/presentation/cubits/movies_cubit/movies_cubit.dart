@@ -8,15 +8,19 @@ class MoviesCubit extends Cubit<MoviesState> {
 
   final MoviesRepository _repository;
 
-  Future<void> loadFirstPage() async {
-    print('[Cubit] State: Loading first page');
+  String? _currentQuery;
+
+  /// Loads the first page. If [query] is provided performs a search.
+  Future<void> loadFirstPage({String? query}) async {
+    print('[Cubit] State: Loading first page (query: ${query ?? "(none)"})');
     // Prevent duplicate loading states
     if (state is MoviesLoading) {
       return;
     }
     emit(const MoviesLoading());
     try {
-      final response = await _repository.getMovies(page: 1);
+      _currentQuery = query;
+      final response = await _repository.getMovies(page: 1, query: query);
       print(
         '[Cubit] State: Success - Loaded ${response.results.length} movies on page ${response.page}',
       );
@@ -30,7 +34,6 @@ class MoviesCubit extends Cubit<MoviesState> {
       );
     } catch (e) {
       print('[Cubit] State: Failure - Error loading first page: $e');
-      // Provide user-friendly error message
       final String errorMessage = e.toString().replaceAll('Exception: ', '');
       emit(
         MoviesFailure(
@@ -57,13 +60,14 @@ class MoviesCubit extends Cubit<MoviesState> {
     final nextPage = current.page + 1;
     print('[Cubit] State: Loading next page ($nextPage)');
     try {
-      final response = await _repository.getMovies(page: nextPage);
+      final response = await _repository.getMovies(
+        page: nextPage,
+        query: _currentQuery,
+      );
       final int totalMovies = current.movies.length + response.results.length;
       print(
         '[Cubit] State: Success - Loaded page $nextPage, total movies now: $totalMovies',
       );
-      // Verify state is still MoviesSuccess before updating
-      // (prevents race condition if user navigated away or state changed)
       final currentState = state;
       if (currentState is MoviesSuccess && currentState.page == current.page) {
         emit(
@@ -75,9 +79,11 @@ class MoviesCubit extends Cubit<MoviesState> {
       }
     } catch (e) {
       print('[Cubit] State: Failure - Error loading next page: $e');
-      // Don't override success state with error when loading next page fails
-      // Keep the existing movies and just log the error
-      // This allows users to retry without losing their current list
     }
+  }
+
+  /// Helper to perform search by query and reset pagination
+  Future<void> search(String query) async {
+    await loadFirstPage(query: query);
   }
 }

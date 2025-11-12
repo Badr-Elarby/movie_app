@@ -1,6 +1,7 @@
 import '../datasources/movie_details_remote_data_source.dart';
 import '../models/movie_details_model.dart';
 import '../models/videos_response_model.dart';
+import '../models/credits_response_model.dart';
 import 'movie_details_repository.dart';
 
 class MovieDetailsRepositoryImpl implements MovieDetailsRepository {
@@ -37,6 +38,22 @@ class MovieDetailsRepositoryImpl implements MovieDetailsRepository {
     } catch (e) {
       print('[Repository] Error fetching movie videos: $e');
       throw Exception('Failed to load movie videos: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<CreditsResponseModel> getMovieCredits({required int movieId}) async {
+    print('[Repository] Fetching movie credits for movie ID: $movieId');
+    try {
+      final CreditsResponseModel credits = await _remoteDataSource
+          .getMovieCredits(movieId: movieId);
+      print(
+        '[Repository] Successfully parsed ${credits.cast.length} cast members',
+      );
+      return credits;
+    } catch (e) {
+      print('[Repository] Error fetching movie credits: $e');
+      throw Exception('Failed to load movie credits: ${e.toString()}');
     }
   }
 }

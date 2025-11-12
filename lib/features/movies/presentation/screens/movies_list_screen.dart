@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_movie_app/core/routing/app_router.dart';
@@ -7,8 +8,23 @@ import 'package:simple_movie_app/features/movies/presentation/cubits/movies_cubi
 import 'package:simple_movie_app/features/movies/presentation/cubits/movies_cubit/movies_state.dart';
 import 'package:simple_movie_app/features/movies/data/models/movie_model.dart';
 
-class MoviesListScreen extends StatelessWidget {
+class MoviesListScreen extends StatefulWidget {
   const MoviesListScreen({super.key});
+
+  @override
+  State<MoviesListScreen> createState() => _MoviesListScreenState();
+}
+
+class _MoviesListScreenState extends State<MoviesListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +55,48 @@ class MoviesListScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search movies...',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear_rounded),
+                    onPressed: () {
+                      _searchController.clear();
+                      // Trigger reload of default list
+                      try {
+                        context.read<MoviesCubit>().loadFirstPage();
+                      } catch (e) {
+                        print('[UI] Error clearing search: $e');
+                      }
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                ),
+                onChanged: (String value) {
+                  // Debounce input
+                  if (_debounce?.isActive ?? false) _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    try {
+                      if (value.trim().isEmpty) {
+                        context.read<MoviesCubit>().loadFirstPage();
+                      } else {
+                        context.read<MoviesCubit>().search(value.trim());
+                      }
+                    } catch (e) {
+                      print('[UI] Search error: $e');
+                    }
+                  });
+                },
+              ),
+            ),
             Expanded(
               child: BlocBuilder<MoviesCubit, MoviesState>(
                 // Performance optimization: only rebuild when state type or content changes
@@ -138,11 +196,7 @@ class MoviesListScreen extends StatelessWidget {
 }
 
 class _MovieCard extends StatelessWidget {
-  const _MovieCard({
-    super.key,
-    required this.movie,
-    required this.onTap,
-  });
+  const _MovieCard({super.key, required this.movie, required this.onTap});
 
   final MovieModel movie;
   final VoidCallback onTap;
@@ -194,26 +248,29 @@ class _MovieCard extends StatelessWidget {
                           imageUrl: imageUrl,
                           fit: BoxFit.cover,
                           placeholder: (BuildContext context, String url) {
-                            print('[UI] Loading cached image for "${movie.title}" from $url');
+                            print(
+                              '[UI] Loading cached image for "${movie.title}" from $url',
+                            );
                             return Center(
                               child: CircularProgressIndicator(
                                 color: colorScheme.secondary,
                               ),
                             );
                           },
-                          errorWidget: (
-                            BuildContext context,
-                            String url,
-                            dynamic error,
-                          ) {
-                            print(
-                              '[UI] ERROR: Failed to load cached image for "${movie.title}": $error',
-                            );
-                            return Icon(
-                              Icons.image_not_supported_outlined,
-                              color: colorScheme.onSurfaceVariant,
-                            );
-                          },
+                          errorWidget:
+                              (
+                                BuildContext context,
+                                String url,
+                                dynamic error,
+                              ) {
+                                print(
+                                  '[UI] ERROR: Failed to load cached image for "${movie.title}": $error',
+                                );
+                                return Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: colorScheme.onSurfaceVariant,
+                                );
+                              },
                           // Cache configuration
                           memCacheWidth: 140,
                           memCacheHeight: 200,

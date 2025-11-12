@@ -331,6 +331,97 @@ class MovieDetailsScreen extends StatelessWidget {
           Text('Description', style: textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(details.overview, style: textTheme.bodyMedium),
+          const SizedBox(height: 20),
+          // Cast section
+          Text('Cast', style: textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Builder(
+            builder: (BuildContext context) {
+              final state = context.read<MovieDetailsCubit>().state;
+              if (state is MovieDetailsSuccess &&
+                  state.cast != null &&
+                  state.cast!.isNotEmpty) {
+                final List cast = state.cast!;
+                return SizedBox(
+                  height: 140,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: cast.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (BuildContext context, int index) {
+                      final dynamic member = cast[index];
+                      final String? profilePath = member.profilePath as String?;
+                      final String imageUrl =
+                          profilePath != null && profilePath.isNotEmpty
+                          ? 'https://image.tmdb.org/t/p/w185$profilePath'
+                          : '';
+
+                      return SizedBox(
+                        width: 100,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                width: 84,
+                                height: 84,
+                                color: colorScheme.surfaceVariant,
+                                child: imageUrl.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Center(
+                                          child: CircularProgressIndicator(
+                                            color: colorScheme.secondary,
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(
+                                              Icons.person_2_outlined,
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                              size: 36,
+                                            ),
+                                      )
+                                    : Icon(
+                                        Icons.person_2_outlined,
+                                        color: colorScheme.onSurfaceVariant,
+                                        size: 36,
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              member.name ?? '',
+                              style: textTheme.bodySmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              member.character ?? '',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }
+              // No cast available
+              return Text(
+                'No cast information available.',
+                style: textTheme.bodySmall,
+              );
+            },
+          ),
         ],
       ),
     );
