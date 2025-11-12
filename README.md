@@ -151,16 +151,14 @@ lib/
 ---
 
 ## 🌟 Light Theme
-| Home Screen | Home Screen (Scroll) | Details Screen |
-|--------------|----------------------|----------------|
-| ![Light Home 1](media/home_light_1.jpg) | ![Light Home 2](media/home_light_2.jpg) | ![Light Details](media/details_light.jpg) |
+
+| ![Dark Home 1](media/home_light_1.jpg) | ![Dark Home 2](media/home_light_2.jpg) | ![Dark Details 1](media/details_light_1.jpg) | ![Dark Details 2](media/details_light_2.jpg) | ![Dark Details 2](media/Trailer.jpg)
 
 ---
 
 ## 🌙 Dark Theme
-| Home Screen | Home Screen (Scroll) | Details Screen |
-|--------------|----------------------|----------------|
-| ![Dark Home 1](media/home_dark_1.jpg) | ![Dark Home 2](media/home_dark_2.jpg) | ![Dark Details](media/details_dark.jpg) |
+
+| ![Dark Home 1](media/home_dark_1.jpg) | ![Dark Home 2](media/home_dark_2.jpg) | ![Dark Details 1](media/details_dark_1.jpg) | ![Dark Details 2](media/details_dark_2.jpg)
 
 ---
 
